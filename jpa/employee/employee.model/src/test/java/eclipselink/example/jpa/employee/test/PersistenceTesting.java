@@ -46,7 +46,7 @@ public class PersistenceTesting {
         setProperty(props, PersistenceUnitProperties.JDBC_PASSWORD, "app");
 
         // Ensure weaving is used
-        props.put(PersistenceUnitProperties.WEAVING, "true");
+        props.put(PersistenceUnitProperties.WEAVING, "false");
 
         if (replaceTables) {
             props.put(PersistenceUnitProperties.DDL_GENERATION, PersistenceUnitProperties.DROP_AND_CREATE);

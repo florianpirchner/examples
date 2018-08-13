@@ -13,12 +13,16 @@
  ******************************************************************************/
 package eclipselink.example.jpa.employee.model;
 
+import java.io.Serializable;
+import java.util.Date;
+
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.IdClass;
 import javax.persistence.Lob;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Version;
@@ -26,99 +30,153 @@ import javax.persistence.Version;
 import org.eclipse.persistence.annotations.Cache;
 
 @Entity
-@Cache(refreshOnlyIfNewer=true)
+@Cache(refreshOnlyIfNewer = true)
+@IdClass(Address.ID.class)
 public class Address {
-    @Id
-    @Column(name = "ADDRESS_ID")
-    @GeneratedValue(generator="ADDR_SEQ")
-    @SequenceGenerator(name="ADDR_SEQ")
-    private int id;
 
-    @Basic
-    private String city;
-    
-    @Lob
-    @Basic(fetch = FetchType.LAZY)
-    private String country;
-    
-    @Basic
-    private String province;
-    
-    @Basic
-    @Column(name = "P_CODE")
-    private String postalCode;
-    
-    @Basic
-    private String street;
-    
-    @Version
-    private long version;
+	@Id
+	@Column(name = "ID", updatable = false)
+	@GeneratedValue(generator = "ADDR_SEQ")
+	@SequenceGenerator(name = "ADDR_SEQ")
+	private int id;
 
-    public Address() {
-    }
+	@Id
+	@Column(updatable = false)
+	private Date validFrom;
 
-    public Address(String city, String country, String province, String postalCode, String street) {
-        super();
-        this.city = city;
-        this.country = country;
-        this.province = province;
-        this.postalCode = postalCode;
-        this.street = street;
-    }
+	@Basic
+	private String city;
 
-    public int getId() {
-        return this.id;
-    }
+	@Lob
+	@Basic(fetch = FetchType.LAZY)
+	private String country;
 
-    public void setId(int addressId) {
-        this.id = addressId;
-    }
+	@Basic
+	private String province;
 
-    public String getCity() {
-        return city;
-    }
+	@Basic
+	@Column(name = "P_CODE")
+	private String postalCode;
 
-    public void setCity(String city) {
-        this.city = city;
-    }
+	@Basic
+	private String street;
 
-    public String getCountry() {
-        return country;
-    }
+	@Version
+	private long version;
 
-    public void setCountry(String country) {
-        this.country = country;
-    }
+	public Address() {
+	}
 
-    public String getProvince() {
-        return province;
-    }
+	public Address(String city, String country, String province, String postalCode, String street) {
+		super();
+		this.city = city;
+		this.country = country;
+		this.province = province;
+		this.postalCode = postalCode;
+		this.street = street;
+		this.validFrom = new Date();
+	}
 
-    public void setProvince(String province) {
-        this.province = province;
-    }
+	public int getId() {
+		return this.id;
+	}
 
-    public String getPostalCode() {
-        return this.postalCode;
-    }
+	public void setId(int addressId) {
+		this.id = addressId;
+	}
 
-    public void setPostalCode(String pCode) {
-        this.postalCode = pCode;
-    }
+	public Date getValidFrom() {
+		return validFrom;
+	}
 
-    public String getStreet() {
-        return street;
-    }
+	public void setValidFrom(Date validFrom) {
+		this.validFrom = validFrom;
+	}
 
-    public void setStreet(String street) {
-        this.street = street;
-    }
+	public String getCity() {
+		return city;
+	}
 
-    public long getVersion() {
-        return version;
-    }
+	public void setCity(String city) {
+		this.city = city;
+	}
 
-    public void setVersion(long version) {
-        this.version = version;
-    }
+	public String getCountry() {
+		return country;
+	}
+
+	public void setCountry(String country) {
+		this.country = country;
+	}
+
+	public String getProvince() {
+		return province;
+	}
+
+	public void setProvince(String province) {
+		this.province = province;
+	}
+
+	public String getPostalCode() {
+		return this.postalCode;
+	}
+
+	public void setPostalCode(String pCode) {
+		this.postalCode = pCode;
+	}
+
+	public String getStreet() {
+		return street;
+	}
+
+	public void setStreet(String street) {
+		this.street = street;
+	}
+
+	public long getVersion() {
+		return version;
+	}
+
+	public void setVersion(long version) {
+		this.version = version;
+	}
+
+	public Address newVersion() {
+		Address newVersion = new Address();
+		newVersion.id = id;
+		newVersion.validFrom = new Date();
+		newVersion.city = city;
+		newVersion.country = city;
+		newVersion.postalCode = city;
+		newVersion.province = city;
+		newVersion.street = city;
+		return newVersion;
+	}
+
+	public static class ID implements Serializable {
+		private static final long serialVersionUID = 1L;
+
+		public int id;
+		public Date validFrom;
+
+		public ID() {
+		}
+
+		public ID(int empId, Date validFrom) {
+			this.id = empId;
+			this.validFrom = validFrom;
+		}
+
+		public boolean equals(Object other) {
+			if (other instanceof ID) {
+				final ID otherID = (ID) other;
+				return otherID.id == id && otherID.validFrom.equals(validFrom);
+			}
+			return false;
+		}
+
+		public int hashCode() {
+			return super.hashCode();
+		}
+	}
 }

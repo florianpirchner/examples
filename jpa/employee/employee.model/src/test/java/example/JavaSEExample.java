@@ -12,14 +12,15 @@
  ******************************************************************************/
 package example;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
 
+import eclipselink.example.jpa.employee.model.Address;
 import eclipselink.example.jpa.employee.model.Employee;
-import eclipselink.example.jpa.employee.model.Gender;
 import eclipselink.example.jpa.employee.model.SamplePopulation;
 import eclipselink.example.jpa.employee.test.PersistenceTesting;
 
@@ -35,6 +36,11 @@ import eclipselink.example.jpa.employee.test.PersistenceTesting;
 public class JavaSEExample {
 
     public static void main(String[] args) throws Exception {
+    	new JavaSEExample().run();
+    }
+    
+    public void run(){
+
         EntityManagerFactory emf = PersistenceTesting.createEMF(true);
         JavaSEExample example = new JavaSEExample();
 
@@ -44,34 +50,18 @@ public class JavaSEExample {
             em.getTransaction().begin();
             new SamplePopulation().createNewEmployees(em, 10);
 
-            // Add employee with 555 area code to satisfy a test query
-            Employee e = new Employee();
-            e.setFirstName("John");
-            e.setLastName("Doe");
-            e.setGender(Gender.Male);
-            e.addPhoneNumber("HOME", "555", "5552222");
-            em.persist(e);
-
             em.getTransaction().commit();
             em.clear();
 
-            example.queryAllEmployees(em);
-            em.clear();
-
-            example.queryEmployeeLikeAreaCode55(em);
-            em.clear();
-
-            example.modifyEmployee(em, 1);
-            em.clear();
-
-            example.deleteEmployee(em, 1);
-            em.clear();
-
+            queryAllAddress(em);
+            queryAllEmployees(em);
+            
             em.close();
 
         } finally {
             emf.close();
         }
+    
     }
 
     public void queryAllEmployees(EntityManager em) {
@@ -79,7 +69,15 @@ public class JavaSEExample {
 
         System.out.println("Query All Results: " + results.size());
 
-        results.forEach(e -> System.out.println("\t>" + e));
+        results.forEach(e -> System.out.println("\t>" + e + " - AID: " + e.getAddress().getId() + " AValid: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(e.getAddress().getValidFrom()))) ;
+    }
+    
+    public void queryAllAddress(EntityManager em) {
+        List<Address> results = em.createQuery("SELECT e FROM Address e", Address.class).getResultList();
+
+        System.out.println("Query All Results: " + results.size());
+
+        results.forEach(e -> System.out.println("\t>" + e.getId() + " AValid: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(e.getValidFrom())));
     }
 
     public void queryEmployeeLikeAreaCode55(EntityManager em) {

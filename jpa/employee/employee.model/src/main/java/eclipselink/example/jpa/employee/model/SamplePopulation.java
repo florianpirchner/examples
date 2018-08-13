@@ -12,6 +12,9 @@
  ******************************************************************************/
 package eclipselink.example.jpa.employee.model;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.Random;
 
 import javax.persistence.EntityManager;
@@ -27,33 +30,63 @@ import javax.persistence.EntityManager;
  */
 public class SamplePopulation {
 
-    /**
-     * Create the specified number of random sample employees.  
-     */
-    public void createNewEmployees(EntityManager em, int quantity) {
-        for (int index = 0; index < quantity; index++) {
-            em.persist(createRandomEmployee());
-        }
-    }
+	/**
+	 * Create the specified number of random sample employees.
+	 */
+	public void createNewEmployees(EntityManager em, int quantity) {
+		Address adrV1 = createAddress();
+		em.persist(adrV1);
+		for (int index = 0; index < quantity; index++) {
+			Address adrVx = createAddressVersion(adrV1, index);
+			em.persist(adrVx);
+		}
 
-    private static final String[] MALE_FIRST_NAMES = { "Jacob", "Ethan", "Michael", "Alexander", "William", "Joshua", "Daniel", "Jayden", "Noah", "Anthony" };
-    private static final String[] FEMALE_FIRST_NAMES = { "Isabella", "Emma", "Olivia", "Sophia", "Ava", "Emily", "Madison", "Abigail", "Chloe", "Mia" };
-    private static final String[] LAST_NAMES = { "Smith", "Johnson", "Williams", "Brown", "Jones", "Miller", "Davis", "Garcia", "Rodriguez", "Wilson" };
+		for (int index = 0; index < quantity; index++) {
+			em.persist(createRandomEmployee(quantity));
+		}
+	}
 
-    public Employee createRandomEmployee() {
-        Random r = new Random();
+	private static final String[] MALE_FIRST_NAMES = { "Jacob", "Ethan", "Michael", "Alexander", "William", "Joshua",
+			"Daniel", "Jayden", "Noah", "Anthony" };
+	private static final String[] FEMALE_FIRST_NAMES = { "Isabella", "Emma", "Olivia", "Sophia", "Ava", "Emily",
+			"Madison", "Abigail", "Chloe", "Mia" };
+	private static final String[] LAST_NAMES = { "Smith", "Johnson", "Williams", "Brown", "Jones", "Miller", "Davis",
+			"Garcia", "Rodriguez", "Wilson" };
 
-        Employee emp = new Employee();
-        emp.setGender(Gender.values()[r.nextInt(2)]);
-        if (Gender.Male.equals(emp.getGender())) {
-            emp.setFirstName(MALE_FIRST_NAMES[r.nextInt(MALE_FIRST_NAMES.length)]);
-        } else {
-            emp.setFirstName(FEMALE_FIRST_NAMES[r.nextInt(FEMALE_FIRST_NAMES.length)]);
-        }
-        emp.setLastName(LAST_NAMES[r.nextInt(LAST_NAMES.length)]);
-        emp.addPhoneNumber("HOME", "111", "5552222");
-        emp.addPhoneNumber("WORK", "222", "5552222");
+	List<Address> addresses = new ArrayList<>();
 
-        return emp;
-    }
+	public Employee createRandomEmployee(int quantity) {
+		Random r = new Random();
+
+		Employee emp = new Employee();
+		emp.setGender(Gender.values()[r.nextInt(2)]);
+		if (Gender.Male.equals(emp.getGender())) {
+			emp.setFirstName(MALE_FIRST_NAMES[r.nextInt(MALE_FIRST_NAMES.length)]);
+		} else {
+			emp.setFirstName(FEMALE_FIRST_NAMES[r.nextInt(FEMALE_FIRST_NAMES.length)]);
+		}
+		emp.setLastName(LAST_NAMES[r.nextInt(LAST_NAMES.length)]);
+
+		emp.setAddress(addresses.get(r.nextInt(quantity - 1)));
+
+		return emp;
+	}
+
+	public Address createAddress() {
+		Address address = new Address("VIENNA", "AT", "W", "1010", "irgendwo");
+		addresses.add(address);
+		return address;
+	}
+
+	public Address createAddressVersion(Address address, int version) {
+		try {
+			// ensure valid from differs
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+		}
+		Address newVersion = address.newVersion();
+		newVersion.setStreet(address.getStreet() + " : " + version);
+		addresses.add(newVersion);
+		return newVersion;
+	}
 }
