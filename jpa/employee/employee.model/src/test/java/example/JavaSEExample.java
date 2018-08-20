@@ -47,14 +47,7 @@ public class JavaSEExample {
         try {
             EntityManager em = emf.createEntityManager();
 
-            em.getTransaction().begin();
-            new SamplePopulation().createNewEmployees(em, 10);
-
-            em.getTransaction().commit();
-            em.clear();
-
-            queryAllAddress(em);
-            queryAllEmployees(em);
+            new SamplePopulation().createAddressVersions(em);
             
             em.close();
 

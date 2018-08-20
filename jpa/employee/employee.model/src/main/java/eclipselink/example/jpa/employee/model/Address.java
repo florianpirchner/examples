@@ -24,14 +24,20 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.Lob;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.SequenceGenerator;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
 import org.eclipse.persistence.annotations.Cache;
+import org.eclipse.persistence.annotations.QueryRedirectors;
 
 @Entity
 @Cache(refreshOnlyIfNewer = true)
 @IdClass(Address.ID.class)
+@QueryRedirectors(insert = AddressInsertQueryRedirector.class, update = AddressUpdateQueryRedirector.class)
 public class Address {
 
 	@Id
@@ -42,7 +48,11 @@ public class Address {
 
 	@Id
 	@Column(updatable = false)
+	@Temporal(TemporalType.TIMESTAMP)
 	private Date validFrom;
+
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date validUntil;
 
 	@Basic
 	private String city;
@@ -77,6 +87,12 @@ public class Address {
 		this.validFrom = new Date();
 	}
 
+	@PrePersist
+	@PreUpdate
+	void postPersist() {
+		validFrom = new Date();
+	}
+
 	public int getId() {
 		return this.id;
 	}
@@ -91,6 +107,14 @@ public class Address {
 
 	public void setValidFrom(Date validFrom) {
 		this.validFrom = validFrom;
+	}
+
+	public Date getValidUntil() {
+		return validUntil;
+	}
+
+	public void setValidUntil(Date validUntil) {
+		this.validUntil = validUntil;
 	}
 
 	public String getCity() {

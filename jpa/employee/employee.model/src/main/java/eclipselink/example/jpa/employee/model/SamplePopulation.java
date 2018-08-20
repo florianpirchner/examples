@@ -12,8 +12,8 @@
  ******************************************************************************/
 package eclipselink.example.jpa.employee.model;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -46,6 +46,62 @@ public class SamplePopulation {
 		}
 	}
 
+	public void createAddressVersions(EntityManager em) {
+		em.getTransaction().begin();
+		Address adrV1 = createAddress();
+		em.persist(adrV1);
+		em.getTransaction().commit();
+		em.clear();
+
+		Address _adrV1 = em.find(Address.class, new Address.ID(adrV1.getId(), adrV1.getValidFrom()));
+
+		em.detach(_adrV1);
+		
+		em.getTransaction().begin();
+		_adrV1.setValidFrom(null);
+		em.persist(_adrV1);
+		em.getTransaction().commit();
+		em.clear();
+
+		queryAllAddress(em);
+
+
+		// need to create an insert
+		//
+		_adrV1 = em.find(Address.class, new Address.ID(adrV1.getId(), adrV1.getValidFrom()));
+		em.getTransaction().begin();
+		_adrV1.setStreet("Blablalba");
+		em.persist(_adrV1);
+		em.getTransaction().commit();
+		em.clear();
+
+		_adrV1 = em.find(Address.class, new Address.ID(_adrV1.getId(), _adrV1.getValidFrom()));
+		
+		Employee emp1 = createRandomEmployee(_adrV1);
+		em.getTransaction().begin();
+		em.persist(emp1);
+		em.getTransaction().commit();
+		em.clear();
+		
+		emp1.setFirstName("Foo bar foo");
+		em.getTransaction().begin();
+		em.persist(emp1);
+		em.getTransaction().commit();
+		em.clear();
+		
+	}
+
+	public void queryAllAddress(EntityManager em) {
+		List<Address> results = em.createQuery("SELECT e FROM Address e", Address.class).getResultList();
+
+		System.out.println("Query All Results: " + results.size());
+
+		for (Address adr : results) {
+			System.out.println("\t>" + adr.getId() + " AValid: "
+					+ new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(adr.getValidFrom()));
+		}
+	}
+
 	private static final String[] MALE_FIRST_NAMES = { "Jacob", "Ethan", "Michael", "Alexander", "William", "Joshua",
 			"Daniel", "Jayden", "Noah", "Anthony" };
 	private static final String[] FEMALE_FIRST_NAMES = { "Isabella", "Emma", "Olivia", "Sophia", "Ava", "Emily",
@@ -68,6 +124,23 @@ public class SamplePopulation {
 		emp.setLastName(LAST_NAMES[r.nextInt(LAST_NAMES.length)]);
 
 		emp.setAddress(addresses.get(r.nextInt(quantity - 1)));
+
+		return emp;
+	}
+	
+	public Employee createRandomEmployee(Address adr) {
+		Random r = new Random();
+
+		Employee emp = new Employee();
+		emp.setGender(Gender.values()[r.nextInt(2)]);
+		if (Gender.Male.equals(emp.getGender())) {
+			emp.setFirstName(MALE_FIRST_NAMES[r.nextInt(MALE_FIRST_NAMES.length)]);
+		} else {
+			emp.setFirstName(FEMALE_FIRST_NAMES[r.nextInt(FEMALE_FIRST_NAMES.length)]);
+		}
+		emp.setLastName(LAST_NAMES[r.nextInt(LAST_NAMES.length)]);
+
+		emp.setAddress(adr);
 
 		return emp;
 	}
