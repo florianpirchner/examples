@@ -41,18 +41,19 @@ import org.eclipse.persistence.annotations.QueryRedirectors;
 public class Address {
 
 	@Id
-	@Column(name = "ID", updatable = false)
-	@GeneratedValue(generator = "ADDR_SEQ")
-	@SequenceGenerator(name = "ADDR_SEQ")
-	private int id;
+	@Column(name = "ADR_ID", updatable = true)
+	private String id;
 
 	@Id
-	@Column(updatable = false)
+	@Column(name = "ADR_VALIDFROM", updatable = false)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date validFrom;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date validUntil;
+	
+	@Basic
+	private boolean histCurrent;
 
 	@Basic
 	private String city;
@@ -93,11 +94,11 @@ public class Address {
 		validFrom = new Date();
 	}
 
-	public int getId() {
+	public String getId() {
 		return this.id;
 	}
 
-	public void setId(int addressId) {
+	public void setId(String addressId) {
 		this.id = addressId;
 	}
 
@@ -165,6 +166,14 @@ public class Address {
 		this.version = version;
 	}
 
+	public boolean isHistCurrent() {
+		return histCurrent;
+	}
+
+	public void setHistCurrent(boolean histCurrent) {
+		this.histCurrent = histCurrent;
+	}
+
 	public Address newVersion() {
 		Address newVersion = new Address();
 		newVersion.id = id;
@@ -176,31 +185,54 @@ public class Address {
 		newVersion.street = city;
 		return newVersion;
 	}
+	
+	public void newVersionInternal() {
+		this.validFrom = new Date();
+	}
 
 	public static class ID implements Serializable {
 		private static final long serialVersionUID = 1L;
 
-		public int id;
+		public String id;
 		public Date validFrom;
 
 		public ID() {
 		}
 
-		public ID(int empId, Date validFrom) {
+		public ID(String empId, Date validFrom) {
 			this.id = empId;
 			this.validFrom = validFrom;
 		}
 
-		public boolean equals(Object other) {
-			if (other instanceof ID) {
-				final ID otherID = (ID) other;
-				return otherID.id == id && otherID.validFrom.equals(validFrom);
-			}
-			return false;
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			ID other = (ID) obj;
+			if (id == null) {
+				if (other.id != null)
+					return false;
+			} else if (!id.equals(other.id))
+				return false;
+			if (validFrom == null) {
+				if (other.validFrom != null)
+					return false;
+			} else if (!validFrom.equals(other.validFrom))
+				return false;
+			return true;
 		}
 
+		@Override
 		public int hashCode() {
-			return super.hashCode();
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((id == null) ? 0 : id.hashCode());
+			result = prime * result + ((validFrom == null) ? 0 : validFrom.hashCode());
+			return result;
 		}
 	}
 }

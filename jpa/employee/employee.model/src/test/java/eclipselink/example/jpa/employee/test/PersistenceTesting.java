@@ -37,6 +37,8 @@ public class PersistenceTesting {
         props.put(PersistenceUnitProperties.NON_JTA_DATASOURCE, "");
         props.put(PersistenceUnitProperties.JTA_DATASOURCE, "");
         props.put(PersistenceUnitProperties.TRANSACTION_TYPE, "RESOURCE_LOCAL");
+//        props.put(PersistenceUnitProperties.SESSION_CUSTOMIZER,
+//				"eclipselink.example.jpa.employee.model.HistorizedSequence");
         
         // Configure the use of embedded derby for the tests allowing system
         // properties of the same name to override

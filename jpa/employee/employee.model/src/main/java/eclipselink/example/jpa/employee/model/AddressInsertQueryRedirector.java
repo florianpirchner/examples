@@ -24,27 +24,26 @@ public class AddressInsertQueryRedirector implements QueryRedirector {
 		InsertObjectQuery insertObjectQuery = (InsertObjectQuery) query;
 		Address addr = (Address) insertObjectQuery.getObject();
 
+		if(addr.getVersion() > 1) {
+			throw new IllegalArgumentException("Version is greater then 1");
+		}
+		
 		Date maxDate = getMaxDate();
 		addr.setValidUntil(maxDate);
 
 		Call call = new JPQLCall("select a from Address a where a.id = :id and a.validUntil = :maxDate");
 		ReadObjectQuery readQuery = new ReadObjectQuery(Address.class, call);
-		readQuery.addArgument("id", Integer.class);
+		readQuery.addArgument("id", String.class);
 		readQuery.addArgument("maxDate", Date.class);
 		readQuery.addArgumentValue(addr.getId());
 		readQuery.addArgumentValue(maxDate);
 		Address oldAddress = (Address) readQuery.execute((AbstractSession) session, EmptyRecord.getEmptyRecord());
 		if (oldAddress != null) {
 			oldAddress.setValidUntil(addr.getValidFrom());
+			oldAddress.setHistCurrent(false);
 			UpdateObjectQuery updateObjectQuery = new UpdateObjectQuery(oldAddress);
 			updateObjectQuery.setDoNotRedirect(true);
 			updateObjectQuery.execute((AbstractSession) session, EmptyRecord.getEmptyRecord());
-
-			// set the sequence to null -> We do not want to get new ids for multiple updates
-			//
-//			ClassDescriptor desc = (ClassDescriptor) insertObjectQuery.getDescriptor().clone();
-//			desc.setSequence(null);
-//			insertObjectQuery.setDescriptor(desc);
 		}
 
 		insertObjectQuery.setDoNotRedirect(true);

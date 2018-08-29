@@ -16,6 +16,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 import javax.persistence.EntityManager;
 
@@ -53,42 +54,109 @@ public class SamplePopulation {
 		em.getTransaction().commit();
 		em.clear();
 
+		sleep1();
+
 		Address _adrV1 = em.find(Address.class, new Address.ID(adrV1.getId(), adrV1.getValidFrom()));
 
 		em.detach(_adrV1);
-		
+
 		em.getTransaction().begin();
 		_adrV1.setValidFrom(null);
 		em.persist(_adrV1);
 		em.getTransaction().commit();
 		em.clear();
 
-		queryAllAddress(em);
+		sleep1();
 
+		queryAllAddress(em);
 
 		// need to create an insert
 		//
 		_adrV1 = em.find(Address.class, new Address.ID(adrV1.getId(), adrV1.getValidFrom()));
+		em.detach(_adrV1);
 		em.getTransaction().begin();
 		_adrV1.setStreet("Blablalba");
-		em.persist(_adrV1);
+		em.merge(_adrV1);
 		em.getTransaction().commit();
 		em.clear();
 
+		sleep1();
+
 		_adrV1 = em.find(Address.class, new Address.ID(_adrV1.getId(), _adrV1.getValidFrom()));
-		
+
 		Employee emp1 = createRandomEmployee(_adrV1);
 		em.getTransaction().begin();
 		em.persist(emp1);
 		em.getTransaction().commit();
 		em.clear();
-		
+
+		sleep1();
+
+		// // update an old version
+		// Address oldVersion = queryFristAddress(em);
+		// em.detach(oldVersion);
+		// oldVersion.setStreet("Foobar");
+		// em.getTransaction().begin();
+		// em.merge(oldVersion);
+		// em.getTransaction().commit();
+		// em.clear();
+
+		emp1 = em.find(Employee.class, emp1.getId());
+		em.detach(emp1);
 		emp1.setFirstName("Foo bar foo");
+		emp1.getAddress().setStreet("HD");
 		em.getTransaction().begin();
-		em.persist(emp1);
+		em.merge(emp1);
 		em.getTransaction().commit();
 		em.clear();
-		
+
+		sleep1();
+
+		emp1 = em.find(Employee.class, emp1.getId());
+		em.detach(emp1);
+		emp1.setFirstName("Foo bar foo");
+		emp1.getAddress().setStreet("HD2");
+		em.getTransaction().begin();
+		em.merge(emp1);
+		em.getTransaction().commit();
+		em.clear();
+
+		sleep1();
+
+		emp1 = em.find(Employee.class, emp1.getId());
+		em.detach(emp1);
+		emp1.setFirstName("Foo bar foo");
+		emp1.getAddress().setStreet("HD3");
+		em.getTransaction().begin();
+		em.merge(emp1);
+		em.getTransaction().commit();
+		em.clear();
+
+		emp1 = em.find(Employee.class, emp1.getId());
+		System.out.println(emp1.getAddress().getCity());
+
+		sleep1();
+
+		Address addrV3 = queryActiveAddress(em);
+		addrV3.setCity("NEW YORK");
+		em.getTransaction().begin();
+		em.merge(addrV3);
+		em.getTransaction().commit();
+		em.clear();
+
+		sleep1();
+
+		emp1 = em.find(Employee.class, emp1.getId());
+		System.out.println(emp1.getAddress().getCity());
+
+		sleep1();
+	}
+
+	private void sleep1() {
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+		}
 	}
 
 	public void queryAllAddress(EntityManager em) {
@@ -100,6 +168,19 @@ public class SamplePopulation {
 			System.out.println("\t>" + adr.getId() + " AValid: "
 					+ new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(adr.getValidFrom()));
 		}
+	}
+
+	public Address queryFristAddress(EntityManager em) {
+		List<Address> results = em.createQuery("SELECT e FROM Address e", Address.class).getResultList();
+
+		return results.get(0);
+	}
+
+	public Address queryActiveAddress(EntityManager em) {
+		List<Address> results = em.createQuery("SELECT e FROM Address e where e.version = 1", Address.class)
+				.getResultList();
+
+		return results.get(0);
 	}
 
 	private static final String[] MALE_FIRST_NAMES = { "Jacob", "Ethan", "Michael", "Alexander", "William", "Joshua",
@@ -127,7 +208,7 @@ public class SamplePopulation {
 
 		return emp;
 	}
-	
+
 	public Employee createRandomEmployee(Address adr) {
 		Random r = new Random();
 
@@ -147,6 +228,7 @@ public class SamplePopulation {
 
 	public Address createAddress() {
 		Address address = new Address("VIENNA", "AT", "W", "1010", "irgendwo");
+		address.setId(UUID.randomUUID().toString());
 		addresses.add(address);
 		return address;
 	}

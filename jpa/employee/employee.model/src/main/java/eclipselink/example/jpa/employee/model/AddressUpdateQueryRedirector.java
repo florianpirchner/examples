@@ -24,9 +24,14 @@ public class AddressUpdateQueryRedirector implements QueryRedirector {
 		UpdateObjectQuery updateObjectQuery = (UpdateObjectQuery) query;
 		Address addr = (Address) updateObjectQuery.getObject();
 
+		if(addr.getVersion() > 1) {
+			throw new IllegalArgumentException("Version is greater then 1");
+		}
+
 		// update the validFrom to now
 		addr.setValidFrom(new Date());
 		addr.setValidUntil(maxDate);
+		addr.setHistCurrent(true);
 
 		InsertObjectQuery insertObjectQuery = new InsertObjectQuery(addr);
 
