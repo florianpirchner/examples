@@ -20,16 +20,11 @@ import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.Lob;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Version;
 
 import org.eclipse.persistence.annotations.Cache;
 import org.eclipse.persistence.annotations.QueryRedirectors;
@@ -37,12 +32,8 @@ import org.eclipse.persistence.annotations.QueryRedirectors;
 @Entity
 @Cache(refreshOnlyIfNewer = true)
 @IdClass(Address.ID.class)
-@QueryRedirectors(insert = AddressInsertQueryRedirector.class, update = AddressUpdateQueryRedirector.class)
-public class Address {
-
-	@Id
-	@Column(name = "ADR_ID", updatable = true)
-	private String id;
+@QueryRedirectors(insert = AddressInsertQueryRedirector.class, update = AddressInsertQueryRedirector.class)
+public class Address extends BaseUUID {
 
 	@Id
 	@Column(name = "ADR_VALIDFROM", updatable = false)
@@ -51,7 +42,7 @@ public class Address {
 
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date validUntil;
-	
+
 	@Basic
 	private boolean histCurrent;
 
@@ -72,9 +63,6 @@ public class Address {
 	@Basic
 	private String street;
 
-	@Version
-	private long version;
-
 	public Address() {
 	}
 
@@ -88,19 +76,11 @@ public class Address {
 		this.validFrom = new Date();
 	}
 
-	@PrePersist
-	@PreUpdate
-	void postPersist() {
-		validFrom = new Date();
-	}
-
-	public String getId() {
-		return this.id;
-	}
-
-	public void setId(String addressId) {
-		this.id = addressId;
-	}
+	// @PrePersist
+	// @PreUpdate
+	// void postPersist() {
+	// validFrom = new Date();
+	// }
 
 	public Date getValidFrom() {
 		return validFrom;
@@ -158,14 +138,6 @@ public class Address {
 		this.street = street;
 	}
 
-	public long getVersion() {
-		return version;
-	}
-
-	public void setVersion(long version) {
-		this.version = version;
-	}
-
 	public boolean isHistCurrent() {
 		return histCurrent;
 	}
@@ -176,7 +148,7 @@ public class Address {
 
 	public Address newVersion() {
 		Address newVersion = new Address();
-		newVersion.id = id;
+		newVersion.setId(getId());
 		newVersion.validFrom = new Date();
 		newVersion.city = city;
 		newVersion.country = city;
@@ -185,9 +157,15 @@ public class Address {
 		newVersion.street = city;
 		return newVersion;
 	}
-	
-	public void newVersionInternal() {
-		this.validFrom = new Date();
+
+	// public void newVersionInternal() {
+	// this.validFrom = new Date();
+	// }
+
+	@Override
+	public String toString() {
+		return "Address [validFrom=" + validFrom + ", validUntil=" + validUntil + ", histCurrent=" + histCurrent
+				+ ", getId()=" + getId() + ", getVersion()=" + getVersion() + "]";
 	}
 
 	public static class ID implements Serializable {

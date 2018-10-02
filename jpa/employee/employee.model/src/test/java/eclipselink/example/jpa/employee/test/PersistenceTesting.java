@@ -42,15 +42,15 @@ public class PersistenceTesting {
         
         // Configure the use of embedded derby for the tests allowing system
         // properties of the same name to override
-//        setProperty(props, PersistenceUnitProperties.JDBC_DRIVER, "org.apache.derby.jdbc.EmbeddedDriver");
-//        setProperty(props, PersistenceUnitProperties.JDBC_URL, "jdbc:derby:target/derby/mysports;create=true");
-//        setProperty(props, PersistenceUnitProperties.JDBC_USER, "app");
-//        setProperty(props, PersistenceUnitProperties.JDBC_PASSWORD, "app");
-        
+//		setProperty(props, PersistenceUnitProperties.JDBC_DRIVER, "org.apache.derby.jdbc.EmbeddedDriver");
+//		setProperty(props, PersistenceUnitProperties.JDBC_URL, "jdbc:derby:target/derby/mysports;create=true");
+//		setProperty(props, PersistenceUnitProperties.JDBC_USER, "app");
+//		setProperty(props, PersistenceUnitProperties.JDBC_PASSWORD, "app");
+//        
         setProperty(props, PersistenceUnitProperties.JDBC_DRIVER, "com.mysql.jdbc.Driver");
-        setProperty(props, PersistenceUnitProperties.JDBC_URL, "jdbc:mysql://localhost/mysports");
+        setProperty(props, PersistenceUnitProperties.JDBC_URL, "jdbc:mysql://localhost/mysports?allowPublicKeyRetrieval=TRUE&useSSL=FALSE&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC");
         setProperty(props, PersistenceUnitProperties.JDBC_USER, "root");
-        setProperty(props, PersistenceUnitProperties.JDBC_PASSWORD, "");
+        setProperty(props, PersistenceUnitProperties.JDBC_PASSWORD, "DpJf?T.iZ4j(");
 
         // Ensure weaving is used
         props.put(PersistenceUnitProperties.WEAVING, "false");
